@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>IELTS By Puku – Complete Preparation Platform</title>
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Font Awesome 6 (free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* prevent text selection (basic protection) */
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f0f4f8;
+            color: #1e2a3e;
+        }
+        /* Login screen */
+        #login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f2b3d 0%, #1e4a6e 100%);
+        }
+        .login-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+            width: 320px;
+            text-align: center;
+        }
+        .login-card h2 {
+            color: #0f2b3d;
+            margin-bottom: 1.5rem;
+        }
+        .login-card input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #cbd5e1;
+            border-radius: 2rem;
+            font-size: 1rem;
+        }
+        .login-card button {
+            width: 100%;
+            padding: 12px;
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            border-radius: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        .login-card button:hover { background: #2c5282; }
+        .error-msg { color: red; margin-top: 10px; font-size: 0.8rem; }
+
+        /* Main app container */
+        #app-container {
+            display: none;
+            min-height: 100vh;
+        }
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100%;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            padding: 1.5rem 1rem;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        .sidebar .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f2b3d;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .sidebar nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            margin: 4px 0;
+            color: #334155;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: background 0.2s;
+        }
+        .sidebar nav a:hover, .sidebar nav a.active {
+            background: #eef2ff;
+            color: #1e3a5f;
+            font-weight: 500;
+        }
+        .main-content {
+            margin-left: 260px;
+            padding: 2rem;
+        }
+        /* Cards, widgets */
+        .card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+            gap: 1.5rem;
+        }
+        button, .btn {
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        button.secondary {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        .streak-calendar {
+            display: flex;
+            gap: 8px;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+        .streak-day {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .streak-day.active {
+            background: #2c5282;
+            color: white;
+        }
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; padding: 1rem 0.5rem; }
+            .sidebar .logo { font-size: 0; }
+            .sidebar nav a span { display: none; }
+            .sidebar nav a i { margin: 0 auto; }
+            .main-content { margin-left: 70px; }
+        }
+        .protected-content {
+            position: relative;
+            border: 1px solid #ddd;
+            background: #fafcff;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        .watermark { opacity: 0.3; pointer-events: none; text-align: center; font-size: 0.8rem; margin-top: 10px; }
+        audio, iframe { width: 100%; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+    <div class="login-card">
+        <h2>IELTS By Puku</h2>
+        <input type="text" id="username" placeholder="Username (user1..user5)" autocomplete="off">
+        <input type="password" id="password" placeholder="Password">
+        <button id="login-btn">Login</button>
+        <div id="login-error" class="error-msg"></div>
+    </div>
+</div>
+
+<!-- MAIN APP CONTAINER -->
+<div id="app-container">
+    <div class="sidebar">
+        <div class="logo">📘 IELTS By Puku</div>
+        <nav>
+            <a href="#" data-section="dashboard"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
+            <a href="#" data-section="diagnostic"><i class="fas fa-stethoscope"></i> <span>Diagnostic Test</span></a>
+            <a href="#" data-section="planner"><i class="fas fa-calendar-alt"></i> <span>Study Planner</span></a>
+            <a href="#" data-section="practice"><i class="fas fa-headphones"></i> <span>Section Practice</span></a>
+            <a href="#" data-section="random"><i class="fas fa-random"></i> <span>Random Q's</span></a>
+            <a href="#" data-section="vocab"><i class="fas fa-book-open"></i> <span>Vocabulary</span></a>
+            <a href="#" data-section="grammar"><i class="fas fa-language"></i> <span>Grammar</span></a>
+            <a href="#" data-section="writing"><i class="fas fa-pen-fancy"></i> <span>Writing Practice</span></a>
+            <a href="#" data-section="mockexams"><i class="fas fa-file-alt"></i> <span>Mock Exams</span></a>
+            <a href="#" data-section="progress"><i class="fas fa-chart-line"></i> <span>Progress</span></a>
+            <a href="#" data-section="leaderboard"><i class="fas fa-trophy"></i> <span>Leaderboard</span></a>
+            <a href="#" data-section="library"><i class="fas fa-database"></i> <span>Library</span></a>
+        </nav>
+    </div>
+    <div class="main-content" id="main-content">
+        <!-- dynamic content will be injected here -->
+    </div>
+</div>
+
+<script>
+    // ---------- USER CREDENTIALS ----------
+    const validUsers = ['user1','user2','user3','user4','user5'];
+    const password = 'ieltsvaultnepal';
+
+    // ---------- GLOBAL STATE ----------
+    let currentUser = null;
+    // Store user data in localStorage per user
+    function getUserData() {
+        if(!currentUser) return {};
+        const data = localStorage.getItem(`ielts_puku_${currentUser}`);
+        return data ? JSON.parse(data) : {
+            studyPlan: null,
+            diagnosticScore: null,
+            mockScores: [],
+            writingScores: [],
+            streak: { lastLogin: null, count: 0 },
+            randomMode: false
+        };
+    }
+    function saveUserData(data) {
+        if(!currentUser) return;
+        localStorage.setItem(`ielts_puku_${currentUser}`, JSON.stringify(data));
+    }
+
+    // Helper: update streak calendar on login
+    function updateStreak() {
+        let ud = getUserData();
+        const today = new Date().toDateString();
+        if(ud.streak.lastLogin !== today) {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate()-1);
+            const yesterdayStr = yesterday.toDateString();
+            if(ud.streak.lastLogin === yesterdayStr) ud.streak.count++;
+            else ud.streak.count = 1;
+            ud.streak.lastLogin = today;
+            saveUserData(ud);
+        }
+        renderStreakCalendar(ud.streak);
+    }
+
+    // Render functions (partial)
+    function renderDashboard() {
+        const ud = getUserData();
+        const diag = ud.diagnosticScore ? ud.diagnosticScore : 'Not taken';
+        const plan = ud.studyPlan ? `Target: ${ud.studyPlan.targetBand}, Schedule: ${ud.studyPlan.schedule}` : 'Not set';
+        document.getElementById('main-content').innerHTML = `
+            <h2>Dashboard</h2>
+            <div class="grid-2">
+                <div class="card"><h3>Diagnostic Test</h3><p>Score: ${diag}</p><button onclick="loadSection('diagnostic')">Take Test</button></div>
+                <div class="card"><h3>Study Plan</h3><p>${plan}</p><button onclick="loadSection('planner')">Edit Plan</button></div>
+                <div class="card"><h3>Streak Calendar</h3><div id="streak-calendar" class="streak-calendar"></div></div>
+                <div class="card"><h3>Recent Mock</h3><p>Last score: ${ud.mockScores.length>0 ? ud.mockScores[ud.mockScores.length-1] : 'None'}</p><button onclick="loadSection('mockexams')">Take Mock</button></div>
+            </div>
+        `;
+        renderStreakCalendar(ud.streak);
+    }
+    function renderStreakCalendar(streak) {
+        const container = document.getElementById('streak-calendar');
+        if(!container) return;
+        const days = ['M','T','W','T','F','S','S'];
+        let html = '';
+        const today = new Date().getDay(); // 0 sun, need adjust
+        for(let i=0;i<7;i++) {
+            let active = (streak.count>0 && i<=streak.count-1) ? 'active' : '';
+            html += `<div class="streak-day ${active}">${days[i]}</div>`;
+        }
+        container.innerHTML = html;
+    }
+
+    // Diagnostic Test (simple 5 MCQ)
+    function renderDiagnostic() {
+        let html = `<h2>Diagnostic Test (Full Computer-Based Mock)</h2><div class="card"><p>Answer the following questions to get your baseline score.</p><div id="diagnostic-questions"></div><button id="submit-diagnostic">Submit & Score</button><div id="diag-result"></div></div>`;
+        document.getElementById('main-content').innerHTML = html;
+        const questions = [
+            {text: "The IELTS Listening test consists of how many sections?", options: ["3","4","5","6"], correct:1},
+            {text: "Which of these is NOT a question type in IELTS Reading?", options: ["Matching headings","True/False/Not Given","Sentence Completion","Audio description"], correct:3},
+            {text: "In Writing Task 2, what is the minimum word count?", options: ["150","200","250","300"], correct:2},
+            {text: "Which part of IELTS Speaking is a monologue?", options: ["Part 1","Part 2","Part 3","All"], correct:1},
+            {text: "What does 'C2' refer to in the vocabulary book?", options: ["Beginner level","Intermediate","Advanced proficiency","Test name"], correct:2}
+        ];
+        let qHtml = '';
+        questions.forEach((q,idx) => {
+            qHtml += `<div style="margin-bottom:20px;"><strong>${idx+1}. ${q.text}</strong><br>`;
+            q.options.forEach((opt, optIdx) => {
+                qHtml += `<label><input type="radio" name="q${idx}" value="${optIdx}"> ${opt}</label> &nbsp; `;
+            });
+            qHtml += `</div>`;
+        });
+        document.getElementById('diagnostic-questions').innerHTML = qHtml;
+        document.getElementById('submit-diagnostic').onclick = () => {
+            let score = 0;
+            for(let i=0;i<questions.length;i++) {
+                let selected = document.querySelector(`input[name="q${i}"]:checked`);
+                if(selected && parseInt(selected.value) === questions[i].correct) score++;
+            }
+            let total = questions.length;
+            let percent = (score/total)*100;
+            let band = (percent/12.5).toFixed(1);
+            let ud = getUserData();
+            ud.diagnosticScore = band;
+            saveUserData(ud);
+            document.getElementById('diag-result').innerHTML = `<p>Your score: ${score}/${total} → Band ${band}</p><p>Diagnostic saved.</p>`;
+        };
+    }
+
+    // Study Planner
+    function renderPlanner() {
+        let ud = getUserData();
+        let saved = ud.studyPlan || { schedule: 'medium', targetBand: '7.0', testDate: '' };
+        let html = `
+            <h2>Customizable Study Planner</h2>
+            <div class="card">
+                <label>Weekly Schedule Intensity:</label><br>
+                <select id="schedule">
+                    <option value="light" ${saved.schedule==='light'?'selected':''}>Light (5h/week)</option>
+                    <option value="medium" ${saved.schedule==='medium'?'selected':''}>Medium (10h/week)</option>
+                    <option value="intense" ${saved.schedule==='intense'?'selected':''}>Intense (20h/week)</option>
+                </select><br><br>
+                <label>Target Band Score:</label>
+                <select id="band">
+                    <option value="6.0" ${saved.targetBand==='6.0'?'selected':''}>6.0</option>
+                    <option value="6.5" ${saved.targetBand==='6.5'?'selected':''}>6.5</option>
+                    <option value="7.0" ${saved.targetBand==='7.0'?'selected':''}>7.0</option>
+                    <option value="7.5" ${saved.targetBand==='7.5'?'selected':''}>7.5</option>
+                    <option value="8.0" ${saved.targetBand==='8.0'?'selected':''}>8.0</option>
+                </select><br><br>
+                <label>Real Test Date:</label>
+                <input type="date" id="testDate" value="${saved.testDate || ''}"><br><br>
+                <button id="savePlan">Save Plan</button>
+                <div id="planMessage"></div>
+            </div>
+        `;
+        document.getElementById('main-content').innerHTML = html;
+        document.getElementById('savePlan').onclick = () => {
+            let newPlan = {
+                schedule: document.getElementById('schedule').value,
+                targetBand: document.getElementById('band').value,
+                testDate: document.getElementById('testDate').value
+            };
+            let ud = getUserData();
+            ud.studyPlan = newPlan;
+            saveUserData(ud);
+            document.getElementById('planMessage').innerText = 'Plan saved!';
+        };
+    }
+
+    // Section Practice (placeholder with sample)
+    function renderPractice() {
+        let html = `
+            <h2>Section-wise Practice</h2>
+            <div class="grid-2">
+                <div class="card"><h3>Listening</h3><audio controls src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio><p>Practice with real audio</p><button onclick="alert('Listening MCQ simulation')">Start Practice</button></div>
+                <div class="card"><h3>Reading</h3><p>Read passage: "The history of coffee"</p><button onclick="alert('Reading comprehension Qs')">Start Reading Quiz</button></div>
+                <div class="card"><h3>Writing</h3><p>Task 2: Some people think... </p><textarea rows="3" placeholder="Write your essay..."></textarea><button>Submit for feedback</button></div>
+                <div class="card"><h3>Speaking</h3><p>Cue Card: Describe a memorable journey.</p><button onclick="alert('Record your voice (demo)')">Practice Speaking</button></div>
+            </div>
+        `;
+        document.getElementById('main-content').innerHTML = html;
+    }
+
+    // Random Question Generator
+    function renderRandom() {
+        let html = `<h2>Random Question Generator</h2><div class="card"><button id="genReading">Generate Random Reading Question</button><button id="genListening" style="margin-left:10px;">Random Listening Question</button><div id="randomOutput" style="margin-top:20px;"></div></div>`;
+        document.getElementById('main-content').innerHTML = html;
+        document.getElementById('genReading').onclick = () => {
+            document.getElementById('randomOutput').innerHTML = `<p>Reading question: "What is the main idea of the passage about renewable energy?"<br><i>Hint: Focus on first paragraph.</i></p>`;
+        };
+        document.getElementById('genListening').onclick = () => {
+            document.getElementById('randomOutput').innerHTML = `<p>Listening question: "What time does the train depart?" (Audio simulated)<br><audio controls src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"></audio></p>`;
+        };
+    }
+
+    // Vocabulary Builder (show words from ebook)
+    function renderVocab() {
+        let html = `<h2>Vocabulary Builder (C2 Level)</h2><div class="card"><ul><li><strong>Mitigate</strong> – to make less severe</li><li><strong>Ubiquitous</strong> – found everywhere</li><li><strong>Ephemeral</strong> – short-lived</li><li><strong>Alleviate</strong> – to ease pain</li><li><strong>Juxtapose</strong> – to place side by side</li></ul><p class="watermark">Full ebook content is available in the Library (protected).</p></div>`;
+        document.getElementById('main-content').innerHTML = html;
+    }
+
+    // Grammar mini lessons
+    function renderGrammar() {
+        let html = `<h2>Grammar Mini-Lessons</h2><div class="grid-2"><div class="card"><h3>Conditionals</h3><p>If + past, would + infinitive (Unreal present)</p></div><div class="card"><h3>Passive Voice</h3><p>Object + be + past participle</p></div></div>`;
+        document.getElementById('main-content').innerHTML = html;
+    }
+
+    // Writing Practice with band calculator
+    function renderWriting() {
+        let html = `<h2>Writing Practice & Band Calculator</h2><div class="card"><textarea rows="6" placeholder="Write your essay here..." style="width:100%"></textarea><br><br><h3>Self-Assessment</h3><label>Task Achievement (1-9):</label><input id="ta" type="number" min="1" max="9" step="0.5"><br>
+        <label>Coherence & Cohesion (1-9):</label><input id="cc" type="number" min="1" max="9" step="0.5"><br>
+        <label>Lexical Resource (1-9):</label><input id="lr" type="number" min="1" max="9" step="0.5"><br>
+        <label>Grammar (1-9):</label><input id="ga" type="number" min="1" max="9" step="0.5"><br>
+        <button id="calcBand">Calculate Band</button><div id="bandResult"></div></div>`;
+        document.getElementById('main-content').innerHTML = html;
+        document.getElementById('calcBand').onclick = () => {
+            let ta = parseFloat(document.getElementById('ta').value) || 0;
+            let cc = parseFloat(document.getElementById('cc').value) || 0;
+            let lr = parseFloat(document.getElementById('lr').value) || 0;
+            let ga = parseFloat(document.getElementById('ga').value) || 0;
+            let avg = (ta+cc+lr+ga)/4;
+            let band = avg.toFixed(1);
+            document.getElementById('bandResult').innerHTML = `<p>Your estimated Writing Band: ${band}</p>`;
+            // save score
+            let ud = getUserData();
+            ud.writingScores = ud.writingScores || [];
+            ud.writingScores.push(band);
+            saveUserData(ud);
+        };
+    }
+
+    // Mock Exams (5 exams)
+    function renderMockExams() {
+        let html = `<h2>Full Mock Exams</h2><div class="card"><p>Select an exam:</p>`;
+        for(let i=1;i<=5;i++) {
+            html += `<button onclick="startMockExam(${i})">Mock Exam ${i}</button> `;
+        }
+        html += `<div id="mockResult"></div></div>`;
+        document.getElementById('main-content').innerHTML = html;
+        window.startMockExam = (examNum) => {
+            let score = Math.floor(Math.random()*9)+1; // simulate band score 1-9
+            let ud = getUserData();
+            ud.mockScores = ud.mockScores || [];
+            ud.mockScores.push(score);
+            saveUserData(ud);
+            document.getElementById('mockResult').innerHTML = `<p>Exam ${examNum} completed! Your band: ${score}</p>`;
+        };
+    }
+
+    // Progress Dashboard (Chart.js)
+    function renderProgress() {
+        let ud = getUserData();
+        let scores = ud.mockScores || [];
+        let ctxId = 'progressChart';
+        let html = `<h2>Progress Dashboard</h2><div class="card"><canvas id="${ctxId}" width="400" height="200"></canvas></div><div class="card"><h3>Writing Scores</h3><p>${ud.writingScores?.join(', ') || 'No data'}</p></div>`;
+        document.getElementById('main-content').innerHTML = html;
+        if(scores.length>0){
+            const ctx = document.getElementById(ctxId).getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: { labels: scores.map((_,i)=>`Mock ${i+1}`), datasets: [{ label: 'Band Score', data: scores, borderColor: '#1e3a5f' }] }
+            });
+        } else {
+            document.getElementById(ctxId).innerHTML = 'Complete a mock exam to see progress.';
+        }
+    }
+
+    // Leaderboard (based on mock scores of all users in localStorage)
+    function renderLeaderboard() {
+        let allUsers = [];
+        for(let u of validUsers) {
+            let data = localStorage.getItem(`ielts_puku_${u}`);
+            if(data){
+                let parsed = JSON.parse(data);
+                let latest = parsed.mockScores?.length ? parsed.mockScores[parsed.mockScores.length-1] : 0;
+                allUsers.push({user:u, score: latest});
+            }
+        }
+        allUsers.sort((a,b)=>b.score-a.score);
+        let html = `<h2>Leaderboard</h2><div class="card"><ul>`;
+        allUsers.forEach(u => { html += `<li><strong>${u.user}</strong> – Best Band: ${u.score}</li>`; });
+        html += `</ul></div>`;
+        document.getElementById('main-content').innerHTML = html;
+    }
+
+    // Library with ebooks (watermarked)
+    function renderLibrary() {
+        let html = `<h2>Central Library (eBooks)</h2><div class="card protected-content">
+                    <p><i class="fas fa-lock"></i> Content is protected – screenshots discouraged.</p>
+                    <h3>IELTS Complete Practice Material (Sample)</h3>
+                    <embed src="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" width="100%" height="300px" type="application/pdf">
+                    <p class="watermark">IELTS By Puku – All rights reserved</p>
+                    <p>Full ebook: includes Listening, Reading, Writing, Speaking with strategies.</p>
+                    <button onclick="alert('Full ebook available after purchase (demo)')">Access Full Content</button>
+                </div>`;
+        document.getElementById('main-content').innerHTML = html;
+    }
+
+    function loadSection(section) {
+        switch(section) {
+            case 'dashboard': renderDashboard(); break;
+            case 'diagnostic': renderDiagnostic(); break;
+            case 'planner': renderPlanner(); break;
+            case 'practice': renderPractice(); break;
+            case 'random': renderRandom(); break;
+            case 'vocab': renderVocab(); break;
+            case 'grammar': renderGrammar(); break;
+            case 'writing': renderWriting(); break;
+            case 'mockexams': renderMockExams(); break;
+            case 'progress': renderProgress(); break;
+            case 'leaderboard': renderLeaderboard(); break;
+            case 'library': renderLibrary(); break;
+            default: renderDashboard();
+        }
+        // set active class on sidebar items
+        document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+        document.querySelector(`.sidebar nav a[data-section="${section}"]`)?.classList.add('active');
+        updateStreak();
+    }
+
+    // Login logic
+    document.getElementById('login-btn').onclick = () => {
+        let uname = document.getElementById('username').value.trim().toLowerCase();
+        let pwd = document.getElementById('password').value;
+        if(validUsers.includes(uname) && pwd === password) {
+            currentUser = uname;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-container').style.display = 'block';
+            loadSection('dashboard');
+        } else {
+            document.getElementById('login-error').innerText = 'Invalid username or password';
+        }
+    };
+</script>
+</body>
+</html>
